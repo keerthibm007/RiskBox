@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "Email Security Extension",
+  "version": "1.0",
+  "description": "Scans Gmail for phishing/spam using AI",
+  "permissions": ["storage", "scripting"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "frontend/popup.html"
+  },
+  "content_scripts": [{
+    "matches": ["*://mail.google.com/*"],
+    "js": ["contentScript.js"]
+  }]
+}
