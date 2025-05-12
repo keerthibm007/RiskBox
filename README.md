@@ -15,6 +15,7 @@ gmail_scanner/
 └── requirements.txt
 
 # Risk Box python part only with gmail api
+
 # RiskBox
 
 /email-security-extension
