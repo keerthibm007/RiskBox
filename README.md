@@ -1,6 +1,11 @@
 # RiskBox
-#bjbkjascuqhi
 
-## change at 10:44
-
-## CHANGE AT 10:47
+/email-security-extension
+├── /frontend
+│   ├── popup.html
+│   ├── popup.css
+│   ├── popup.js
+│   └── icons/
+├── /backend
+│   └── app.py (Flask app for scans)
+├── manifest.json
