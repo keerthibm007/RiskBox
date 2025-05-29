@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Email Categorizer Extension</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+  <div class="flex h-screen">
+    <!-- Sidebar for Categories -->
+    <div class="w-64 bg-white shadow-md p-4">
+      <h2 class="text-xl font-bold mb-4">Categories</h2>
+      <ul id="category-list" class="space-y-2">
+        <li><button class="category-btn w-full text-left px-4 py-2 bg-blue-100 rounded hover:bg-blue-200" data-category="all">All</button></li>
+        <li><button class="category-btn w-full text-left px-4 py-2 hover:bg-blue-200 rounded" data-category="transaction">Transaction</button></li>
+        <li><button class="category-btn w-full text-left px-4 py-2 hover:bg-blue-200 rounded" data-category="otp">OTP</button></li>
+        <li><button class="category-btn w-full text-left px-4 py-2 hover:bg-blue-200 rounded" data-category="educational">Educational</button></li>
+        <li><button class="category-btn w-full text-left px-4 py-2 hover:bg-blue-200 rounded" data-category="promotional">Promotional</button></li>
+        <li><button class="category-btn w-full text-left px-4 py-2 hover:bg-blue-200 rounded" data-category="personal">Personal</button></li>
+      </ul>
+      <button id="toggle-theme" class="mt-4 w-full px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">Toggle Dark Mode</button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 p-6 overflow-auto">
+      <h1 class="text-2xl font-bold mb-4">Email Categorizer</h1>
+      <div class="mb-4">
+        <input id="search-input" type="text" placeholder="Search emails..." class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+      </div>
+      <div id="email-list" class="space-y-4">
+        <!-- Emails will be dynamically inserted here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Dummy email data (replace with API integration)
+    const emails = [
+      { id: 1, subject: "Bank Statement", sender: "bank@example.com", category: "transaction", threat: "low" },
+      { id: 2, subject: "Your OTP Code", sender: "auth@example.com", category: "otp", threat: "low" },
+      { id: 3, subject: "Learn Python Today!", sender: "edu@example.com", category: "educational", threat: "low" },
+      { id: 4, subject: "50% Off Sale!", sender: "shop@example.com", category: "promotional", threat: "moderate" },
+      { id: 5, subject: "Hey, let's catch up!", sender: "friend@example.com", category: "personal", threat: "low" },
+    ];
+
+    // Render emails
+    function renderEmails(category = "all", searchQuery = "") {
+      const emailList = document.getElementById("email-list");
+      emailList.innerHTML = "";
+      let filteredEmails = category === "all" ? emails : emails.filter(email => email.category === category);
+      if (searchQuery) {
+        filteredEmails = filteredEmails.filter(email => 
+          email.subject.toLowerCase().includes(searchQuery.toLowerCase()) || 
+          email.sender.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+      }
+      filteredEmails.forEach(email => {
+        const emailDiv = document.createElement("div");
+        emailDiv.className = "bg-white p-4 rounded shadow flex justify-between items-center";
+        emailDiv.innerHTML = `
+          <div>
+            <h3 class="font-bold">${email.subject}</h3>
+            <p class="text-gray-600">${email.sender}</p>
+            <p class="text-sm text-gray-500">Category: ${email.category}</p>
+            <p class="text-sm text-gray-500">Threat: <span class="threat-level ${email.threat}">${email.threat}</span></p>
+          </div>
+          <div class="flex space-x-2">
+            <select class="category-select border rounded px-2 py-1" data-id="${email.id}">
+              <option value="transaction" ${email.category === "transaction" ? "selected" : ""}>Transaction</option>
+              <option value="otp" ${email.category === "otp" ? "selected" : ""}>OTP</option>
+              <option value="educational" ${email.category === "educational" ? "selected" : ""}>Educational</option>
+              <option value="promotional" ${email.category === "promotional" ? "selected" : ""}>Promotional</option>
+              <option value="personal" ${email.category === "personal" ? "selected" : ""}>Personal</option>
+            </select>
+            <select class="threat-select border rounded px-2 py-1" data-id="${email.id}">
+              <option value="low" ${email.threat === "low" ? "selected" : ""}>Low</option>
+              <option value="moderate" ${email.threat === "moderate" ? "selected" : ""}>Moderate</option>
+              <option value="high" ${email.threat === "high" ? "selected" : ""}>High</option>
+            </select>
+          </div>
+        `;
+        emailList.appendChild(emailDiv);
+      });
+    }
+
+    // Category button event listeners
+    document.querySelectorAll(".category-btn").forEach(button => {
+      button.addEventListener("click", () => {
+        document.querySelectorAll(".category-btn").forEach(btn => btn.classList.remove("bg-blue-100"));
+        button.classList.add("bg-blue-100");
+        renderEmails(button.dataset.category, document.getElementById("search-input").value);
+      });
+    });
+
+    // Search input event listener
+    document.getElementById("search-input").addEventListener("input", (e) => {
+      const activeCategory = document.querySelector(".category-btn.bg-blue-100")?.dataset.category || "all";
+      renderEmails(activeCategory, e.target.value);
+    });
+
+    // Category and threat level change handlers
+    document.addEventListener("change", (e) => {
+      const emailId = parseInt(e.target.dataset.id);
+      const email = emails.find(em => em.id === emailId);
+      if (e.target.classList.contains("category-select")) {
+        email.category = e.target.value;
+      } else if (e.target.classList.contains("threat-select")) {
+        email.threat = e.target.value;
+      }
+      const activeCategory = document.querySelector(".category-btn.bg-blue-100")?.dataset.category || "all";
+      renderEmails(activeCategory, document.getElementById("search-input").value);
+    });
+
+    // Theme toggle
+    document.getElementById("toggle-theme").addEventListener("click", () => {
+      document.body.classList.toggle("dark");
+      document.body.classList.toggle("bg-gray-100");
+      document.body.classList.toggle("bg-gray-900");
+      document.body.classList.toggle("text-black");
+      document.body.classList.toggle("text-white");
+      document.querySelector(".shadow-md").classList.toggle("bg-white");
+      document.querySelector(".shadow-md").classList.toggle("bg-gray-800");
+    });
+
+    // Initial render
+    renderEmails();
+  </script>
+
+  <style>
+    .threat-level.low { color: green; }
+    .threat-level.moderate { color: orange; }
+    .threat-level.high { color: red; }
+    .dark .bg-white { background-color: #1f2937; }
+    .dark .text-gray-600 { color: #d1d5db; }
+    .dark .text-gray-500 { color: #9ca3af; }
+  </style>
+</body>
+</html>
